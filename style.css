@@ -225,11 +225,11 @@ h2 {
   width: 100%;
 }
 
-.list-item.hobby {
-  line-height: 1.8em;   /* 调整行距，比如1.6~1.8之间 */
-  margin-bottom: 10px;  /* 每个 hobby 项之间留空 */
-  width: 80%;  
-}
+/* .list-item.hobby {
+  line-height: 1.8em;   
+  margin-bottom: 10px;  
+  /* width: 80%;   
+} */
 
 .rank, .inst {
   font-style: italic;
