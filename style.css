@@ -231,6 +231,11 @@ h2 {
   width: 80%;  
 }
 
+.rank, .inst {
+  font-style: italic;
+  color: #555;
+  margin-left: 0.3em;
+}
 /**************************************************/
 /* Buttons for showing more or less highlights. */
 
