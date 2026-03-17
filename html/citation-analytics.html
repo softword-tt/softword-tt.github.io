@@ -5,19 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Citation Analytics</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Asap:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --ink:    #0e0d0b;  --ink2: #3d3b35;  --ink3: #7a7870;
-  --paper:  #f6f4ef;  --cream:#ede9e0;
-  --rule:   rgba(0,0,0,0.09);  --rule2: rgba(0,0,0,0.16);
-  --gold:   #b8924a;  --gold2:#e8c87a;
+  /* unified with site theme (index/space) */
+  --ink:    #150c21;
+  --ink2:   #150c21;
+  --ink3:   #a0a8b0;
+  --paper:  #ffffff;
+  --cream:  rgba(255,255,255,0.7);
+  --rule:   rgba(160,168,176,0.25);
+  --rule2:  rgba(160,168,176,0.35);
+  --gold:   rgb(20, 110, 190);
+  --gold2:  rgb(20, 110, 190);
   --green:  #1a6e3c;  --green-l:#e6f4ec;
   --red:    #991b1b;  --red-l: #fef2f2;
-  --ff-disp:'DM Serif Display',Georgia,serif;
-  --ff-body:'DM Sans',system-ui,sans-serif;
-  --ff-mono:'DM Mono','Fira Code',monospace;
+  --ff-disp:'Asap', roboto, sans-serif;
+  --ff-body:'Asap', roboto, sans-serif;
+  --ff-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 html { scroll-behavior: smooth; }
 body { font-family: var(--ff-body); background: var(--paper); color: var(--ink); min-height: 100vh; }
@@ -26,33 +34,33 @@ body { font-family: var(--ff-body); background: var(--paper); color: var(--ink);
 @media (max-width: 740px) { .page-grid { grid-template-columns: 1fr; } }
 
 /* Sidebar */
-.sidebar { background: var(--ink); color: var(--paper); padding: 32px 24px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; overflow-y: auto; }
-.sb-logo { font-family: var(--ff-disp); font-size: 21px; color: var(--gold2); margin-bottom: 4px; }
-.sb-tag  { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 28px; }
-.sb-rule { height: 1px; background: rgba(255,255,255,0.08); margin-bottom: 24px; }
-.sb-lbl  { font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(255,255,255,0.38); margin-bottom: 7px; }
-.sb-input { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 9px 12px; font-family: var(--ff-mono); font-size: 12px; color: var(--paper); outline: none; transition: border-color 0.2s; margin-bottom: 7px; }
-.sb-input::placeholder { color: rgba(255,255,255,0.22); }
+.sidebar { background: rgba(255,255,255,0.7); color: var(--ink); padding: 32px 24px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; overflow-y: auto; border-right: 1px solid var(--rule2); }
+.sb-logo { font-family: var(--ff-disp); font-size: 21px; color: var(--ink); margin-bottom: 4px; }
+.sb-tag  { font-size: 10px; color: var(--ink3); letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 28px; }
+.sb-rule { height: 1px; background: var(--rule); margin-bottom: 24px; }
+.sb-lbl  { font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink3); margin-bottom: 7px; }
+.sb-input { width: 100%; background: rgba(255,255,255,0.85); border: 1px solid var(--rule2); border-radius: 6px; padding: 9px 12px; font-family: var(--ff-mono); font-size: 12px; color: var(--ink); outline: none; transition: border-color 0.2s; margin-bottom: 7px; }
+.sb-input::placeholder { color: rgba(160,168,176,0.9); }
 .sb-input:focus { border-color: var(--gold); }
 .key-row { display: flex; gap: 6px; margin-bottom: 6px; }
 .key-row .sb-input { margin-bottom: 0; flex: 1; }
-.key-vis { background: none; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: rgba(255,255,255,0.4); cursor: pointer; padding: 0 10px; font-size: 11px; transition: color 0.15s; white-space: nowrap; }
-.key-vis:hover { color: var(--gold2); }
+.key-vis { background: none; border: 1px solid var(--rule2); border-radius: 6px; color: var(--ink3); cursor: pointer; padding: 0 10px; font-size: 11px; transition: color 0.15s, border-color 0.15s; white-space: nowrap; }
+.key-vis:hover { color: var(--gold2); border-color: var(--gold2); }
 .key-st { font-size: 10px; font-family: var(--ff-mono); margin-bottom: 16px; }
 .key-st.ok   { color: #4ade80; }
-.key-st.none { color: rgba(255,255,255,0.25); }
+.key-st.none { color: var(--ink3); }
 .sb-btn { width: 100%; background: var(--gold); color: var(--ink); border: none; border-radius: 6px; padding: 10px; font-family: var(--ff-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s, transform 0.1s; margin-bottom: 4px; }
 .sb-btn:hover { background: var(--gold2); }
 .sb-btn:active { transform: scale(0.98); }
-.sb-section { font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin: 24px 0 10px; }
+.sb-section { font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--ink3); margin: 24px 0 10px; }
 .q-entry { display: flex; align-items: center; gap: 10px; padding: 8px 9px; border-radius: 6px; cursor: pointer; transition: background 0.12s; margin-bottom: 2px; }
-.q-entry:hover { background: rgba(255,255,255,0.07); }
-.q-av { width: 28px; height: 28px; border-radius: 50%; background: rgba(184,146,74,0.18); color: var(--gold2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; flex-shrink: 0; }
-.q-name { font-size: 12px; color: rgba(255,255,255,0.7); }
-.q-id   { font-size: 10px; color: rgba(255,255,255,0.28); font-family: var(--ff-mono); }
-.sb-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 10px; color: rgba(255,255,255,0.2); line-height: 1.8; }
-.sb-footer a { color: rgba(255,255,255,0.32); text-decoration: none; }
-.sb-footer a:hover { color: var(--gold2); }
+.q-entry:hover { background: rgba(160,168,176,0.15); }
+.q-av { width: 28px; height: 28px; border-radius: 50%; background: rgba(20,110,190,0.12); color: var(--gold2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; flex-shrink: 0; }
+.q-name { font-size: 12px; color: var(--ink); }
+.q-id   { font-size: 10px; color: var(--ink3); font-family: var(--ff-mono); }
+.sb-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid var(--rule); font-size: 10px; color: var(--ink3); line-height: 1.8; }
+.sb-footer a { color: rgb(20, 110, 190); text-decoration: none; }
+.sb-footer a:hover { color: rgb(20, 110, 190); border-bottom: 1px solid rgb(20, 110, 190); }
 @media (max-width: 740px) { .sidebar { position: static; height: auto; } }
 
 /* Main */
@@ -481,7 +489,11 @@ function doLoad() {
   const id  = document.getElementById('sid-inp').value.trim();
   const key = getKey();
   if (!id)  { alert('Enter a Google Scholar ID.'); return; }
-  if (!key) { alert('Paste your SerpAPI key in the sidebar first.'); return; }
+  // Only require a key when NOT using the Worker (local test fallback).
+  if (!WORKER_URL && !key) {
+    alert('Paste your SerpAPI key in the sidebar first (local test mode).');
+    return;
+  }
   currentId = id;
   document.getElementById('dash-err').innerHTML = '';
   showState('load');
@@ -626,9 +638,22 @@ async function renderMap(countries) {
 (function init() {
   const stored = getKey();
   if (stored) { document.getElementById('key-inp').value=stored; setSt('ok','✓ Key loaded'); }
+  // If Worker is configured, key is not needed on the client. Make this explicit in the UI.
+  if (WORKER_URL) {
+    const inp = document.getElementById('key-inp');
+    if (inp) {
+      inp.placeholder = 'Not needed (Worker mode)';
+      inp.disabled = true;
+    }
+    setSt('ok', '✓ Using Worker (key hidden server-side)');
+  }
   const p = new URLSearchParams(location.search);
   const urlId = p.get('id') || p.get('scholar');
-  if (urlId) { document.getElementById('sid-inp').value=urlId; if(stored) doLoad(); }
+  if (urlId) {
+    document.getElementById('sid-inp').value=urlId;
+    // Auto-run if Worker is configured, or if we have a stored key for local mode.
+    if (WORKER_URL || stored) doLoad();
+  }
 })();
 </script>
 </body>
