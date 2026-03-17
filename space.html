@@ -1,0 +1,103 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>My Space | 个人空间</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1000">
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Asap:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+  </head>
+
+  <body id="body" class="space-page">
+    <div id="main">
+      <div class="space-header">
+        <div>
+          <h1>My Space / 个人空间</h1>
+          <p class="space-subtitle">
+            想到什么就写什么。
+          </p>
+          <p class="space-nav">
+            <a href="index.html">← Back to Home</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="space-stream">
+        <!--
+          用法（复制一块往下贴就行）：
+          <section class="space-block is-note|is-blog|is-tool|is-photo|is-drawing">
+            <div class="space-meta">
+              <span class="space-pill">标签</span>
+              <span class="space-date">2026-03-17</span>
+            </div>
+            <h2>标题</h2>
+            <p>内容...</p>
+          </section>
+        -->
+
+        <section class="space-block is-note">
+          <div class="space-meta">
+            <span class="space-pill">NOTE</span>
+            <span class="space-date">Pinned</span>
+          </div>
+          <h2>怎么往这里加内容？</h2>
+          <p>
+            你想到什么就复制下面任意一个块（Blog/Tool/Photo/Drawing/Note），改标题和内容，然后粘贴到页面最上面。
+            这个页面会一直保持“随手记录”的感觉，但每块内容都能用样式区分。
+          </p>
+        </section>
+<!-- 
+        <section class="space-block is-blog">
+          <div class="space-meta">
+            <span class="space-pill">BLOG</span>
+            <span class="space-date">TODO</span>
+          </div>
+          <h2>第一篇：我为什么做这个“个人空间”</h2>
+          <p>TODO：写几句动机、想记录什么、不想变成什么。</p>
+        </section> -->
+
+        <section class="space-block is-tool">
+          <div class="space-meta">
+            <span class="space-pill">TOOL</span>
+          </div>
+          <h2>Citation Analytics</h2>
+          <p>
+            简单实现了一下scholar <a href="html/citation-analytics.html">citation-analytics</a> 的功能。
+          </p>
+        </section>
+
+        <section class="space-block is-photo">
+          <div class="space-meta">
+            <span class="space-pill">PHOTO</span>
+            <span class="space-date">TODO</span>
+          </div>
+          <h2>摄影碎片</h2>
+          <div class="space-media">
+            <img src="" alt="A photo (placeholder)">
+          </div>
+          <p>TODO：一句话记录当时的光线/温度/心情。</p>
+        </section>
+
+        <section class="space-block is-drawing">
+          <div class="space-meta">
+            <span class="space-pill">DRAWING</span>
+            <span class="space-date">TODO</span>
+          </div>
+          <h2>一张小画</h2>
+          <p>TODO：放图或放一段过程/草稿想法。</p>
+        </section>
+      </div>
+
+      <div id="footer" style="position: static; margin-top: 3em;">
+        <div>
+          <a href="index.html">Home</a> &nbsp;&nbsp;|&nbsp;&nbsp;
+          <a href="space.html">My Space</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+

@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Citation Analytics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --ink:    #0e0d0b;  --ink2: #3d3b35;  --ink3: #7a7870;
+  --paper:  #f6f4ef;  --cream:#ede9e0;
+  --rule:   rgba(0,0,0,0.09);  --rule2: rgba(0,0,0,0.16);
+  --gold:   #b8924a;  --gold2:#e8c87a;
+  --green:  #1a6e3c;  --green-l:#e6f4ec;
+  --red:    #991b1b;  --red-l: #fef2f2;
+  --ff-disp:'DM Serif Display',Georgia,serif;
+  --ff-body:'DM Sans',system-ui,sans-serif;
+  --ff-mono:'DM Mono','Fira Code',monospace;
+}
+html { scroll-behavior: smooth; }
+body { font-family: var(--ff-body); background: var(--paper); color: var(--ink); min-height: 100vh; }
+
+.page-grid { display: grid; grid-template-columns: 268px 1fr; min-height: 100vh; }
+@media (max-width: 740px) { .page-grid { grid-template-columns: 1fr; } }
+
+/* Sidebar */
+.sidebar { background: var(--ink); color: var(--paper); padding: 32px 24px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; overflow-y: auto; }
+.sb-logo { font-family: var(--ff-disp); font-size: 21px; color: var(--gold2); margin-bottom: 4px; }
+.sb-tag  { font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 28px; }
+.sb-rule { height: 1px; background: rgba(255,255,255,0.08); margin-bottom: 24px; }
+.sb-lbl  { font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(255,255,255,0.38); margin-bottom: 7px; }
+.sb-input { width: 100%; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 9px 12px; font-family: var(--ff-mono); font-size: 12px; color: var(--paper); outline: none; transition: border-color 0.2s; margin-bottom: 7px; }
+.sb-input::placeholder { color: rgba(255,255,255,0.22); }
+.sb-input:focus { border-color: var(--gold); }
+.key-row { display: flex; gap: 6px; margin-bottom: 6px; }
+.key-row .sb-input { margin-bottom: 0; flex: 1; }
+.key-vis { background: none; border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: rgba(255,255,255,0.4); cursor: pointer; padding: 0 10px; font-size: 11px; transition: color 0.15s; white-space: nowrap; }
+.key-vis:hover { color: var(--gold2); }
+.key-st { font-size: 10px; font-family: var(--ff-mono); margin-bottom: 16px; }
+.key-st.ok   { color: #4ade80; }
+.key-st.none { color: rgba(255,255,255,0.25); }
+.sb-btn { width: 100%; background: var(--gold); color: var(--ink); border: none; border-radius: 6px; padding: 10px; font-family: var(--ff-body); font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.15s, transform 0.1s; margin-bottom: 4px; }
+.sb-btn:hover { background: var(--gold2); }
+.sb-btn:active { transform: scale(0.98); }
+.sb-section { font-size: 10px; letter-spacing: 0.09em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin: 24px 0 10px; }
+.q-entry { display: flex; align-items: center; gap: 10px; padding: 8px 9px; border-radius: 6px; cursor: pointer; transition: background 0.12s; margin-bottom: 2px; }
+.q-entry:hover { background: rgba(255,255,255,0.07); }
+.q-av { width: 28px; height: 28px; border-radius: 50%; background: rgba(184,146,74,0.18); color: var(--gold2); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; flex-shrink: 0; }
+.q-name { font-size: 12px; color: rgba(255,255,255,0.7); }
+.q-id   { font-size: 10px; color: rgba(255,255,255,0.28); font-family: var(--ff-mono); }
+.sb-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 10px; color: rgba(255,255,255,0.2); line-height: 1.8; }
+.sb-footer a { color: rgba(255,255,255,0.32); text-decoration: none; }
+.sb-footer a:hover { color: var(--gold2); }
+@media (max-width: 740px) { .sidebar { position: static; height: auto; } }
+
+/* Main */
+.main { padding: 40px 44px; max-width: 920px; }
+@media (max-width: 900px) { .main { padding: 28px 20px; } }
+.state { display: none; }
+.state.active { display: block; }
+
+/* Landing */
+.hero { padding: 72px 0 52px; border-bottom: 1px solid var(--rule); margin-bottom: 44px; }
+.hero h1 { font-family: var(--ff-disp); font-size: clamp(34px,5vw,54px); font-weight: 400; line-height: 1.15; letter-spacing: -0.02em; max-width: 500px; margin-bottom: 18px; }
+.hero h1 em { font-style: italic; color: var(--gold); }
+.hero p { font-size: 14px; color: var(--ink2); max-width: 400px; line-height: 1.75; }
+.feat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+@media (max-width: 600px) { .feat-grid { grid-template-columns: 1fr; } }
+.feat { background: var(--cream); border: 1px solid var(--rule2); border-radius: 10px; padding: 18px; }
+.feat-icon { font-size: 18px; margin-bottom: 8px; }
+.feat-t { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.feat-d { font-size: 12px; color: var(--ink3); line-height: 1.6; }
+
+/* Loading */
+.load-wrap { padding: 80px 0; display: flex; flex-direction: column; gap: 18px; }
+.load-row { display: flex; align-items: center; gap: 12px; }
+.load-ring { width: 18px; height: 18px; border: 2px solid var(--rule2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.load-msg { font-family: var(--ff-mono); font-size: 13px; color: var(--ink2); }
+.load-steps { display: flex; flex-direction: column; gap: 5px; padding-left: 30px; }
+.ls { font-size: 11px; font-family: var(--ff-mono); color: var(--ink3); }
+.ls.done::before   { content: '✓ '; color: var(--green); }
+.ls.active::before { content: '› '; color: var(--gold); }
+.ls.pending::before{ content: '· '; }
+
+/* Error */
+.err-box { background: var(--red-l); border: 1px solid #fca5a5; border-radius: 10px; padding: 20px 24px; margin: 32px 0; }
+.err-box h3 { font-size: 13px; font-weight: 500; color: var(--red); margin-bottom: 6px; }
+.err-box p  { font-size: 12px; color: #b91c1c; line-height: 1.65; }
+.err-box code { background: #fee2e2; padding: 1px 5px; border-radius: 3px; font-family: var(--ff-mono); font-size: 11px; }
+
+/* Dashboard */
+.dash-head { display: flex; align-items: flex-start; gap: 16px; padding-bottom: 26px; border-bottom: 1px solid var(--rule); margin-bottom: 26px; flex-wrap: wrap; }
+.d-av { width: 52px; height: 52px; border-radius: 50%; background: var(--cream); border: 2px solid var(--rule2); display: flex; align-items: center; justify-content: center; font-family: var(--ff-disp); font-size: 18px; color: var(--gold); flex-shrink: 0; overflow: hidden; }
+.d-av img { width: 100%; height: 100%; object-fit: cover; }
+.d-meta { flex: 1; }
+.d-name  { font-family: var(--ff-disp); font-size: 25px; font-weight: 400; letter-spacing: -0.01em; line-height: 1.2; }
+.d-affil { font-size: 12px; color: var(--ink3); margin-top: 4px; }
+.d-links { display: flex; gap: 7px; margin-top: 10px; flex-wrap: wrap; }
+.d-link  { font-size: 11px; color: var(--ink2); border: 1px solid var(--rule2); padding: 3px 10px; border-radius: 20px; text-decoration: none; font-family: var(--ff-mono); transition: border-color 0.15s, color 0.15s; }
+.d-link:hover { border-color: var(--gold); color: var(--gold); }
+.d-upd { font-size: 10px; color: var(--ink3); font-family: var(--ff-mono); padding-top: 6px; }
+
+/* Metrics */
+.metrics { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 11px; margin-bottom: 26px; }
+@media (max-width: 600px) { .metrics { grid-template-columns: repeat(2,1fr); } }
+.m-tile { padding: 16px 18px; border: 1px solid var(--rule2); border-radius: 10px; background: var(--cream); position: relative; overflow: hidden; }
+.m-tile::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--gold); opacity:0; transition:opacity 0.3s; }
+.m-tile:hover::before { opacity:1; }
+.m-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink3); margin-bottom: 9px; }
+.m-val { font-family: var(--ff-disp); font-size: 26px; color: var(--ink); line-height: 1; }
+.m-sub { font-size: 10px; color: var(--ink3); margin-top: 5px; font-family: var(--ff-mono); }
+.m-sub.up { color: var(--green); }
+
+/* Sections */
+.sec-head  { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; padding-top: 6px; }
+.sec-title { font-family: var(--ff-disp); font-size: 18px; font-weight: 400; }
+.sec-sub   { font-size: 11px; color: var(--ink3); }
+
+/* Trend */
+.trend-canvas-wrap { position: relative; width: 100%; height: 175px; }
+.trend-empty { padding: 36px; text-align: center; border: 1px dashed var(--rule2); border-radius: 10px; }
+.trend-empty p { font-size: 13px; color: var(--ink3); line-height: 1.75; }
+.trend-empty strong { color: var(--ink2); }
+
+/* Two-col */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 26px; }
+@media (max-width: 680px) { .two-col { grid-template-columns: 1fr; } }
+.data-panel { border: 1px solid var(--rule2); border-radius: 10px; padding: 18px; background: var(--cream); }
+.p-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink3); margin-bottom: 14px; }
+
+/* Bars */
+.hbar-list { display: flex; flex-direction: column; gap: 8px; }
+.hbar-row  { display: flex; align-items: center; gap: 9px; }
+.hbar-lbl  { font-size: 9px; color: var(--ink3); width: 62px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--ff-mono); text-align: right; }
+.hbar-track{ flex: 1; height: 10px; background: rgba(0,0,0,0.06); border-radius: 3px; overflow: hidden; }
+.hbar-fill { height: 100%; border-radius: 3px; background: var(--gold); opacity: 0.5; transition: width 0.8s cubic-bezier(.16,1,.3,1); }
+.hbar-fill.top { opacity: 1; }
+.hbar-num  { font-size: 10px; color: var(--ink2); font-family: var(--ff-mono); width: 36px; }
+
+/* Papers */
+.paper-list { display: flex; flex-direction: column; gap: 6px; }
+.paper-row  { display: flex; align-items: flex-start; gap: 9px; padding: 9px 11px; border-radius: 7px; background: rgba(255,255,255,0.55); border: 1px solid transparent; text-decoration: none; color: inherit; transition: border-color 0.15s, background 0.15s; }
+.paper-row:hover { border-color: var(--rule2); background: #fff; }
+.p-n    { font-size: 10px; color: var(--ink3); font-family: var(--ff-mono); min-width: 14px; padding-top: 1px; }
+.p-body { flex: 1; min-width: 0; }
+.p-t    { font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-meta { font-size: 10px; color: var(--ink3); margin-top: 2px; font-family: var(--ff-mono); }
+.p-gain { flex-shrink: 0; font-size: 10px; font-family: var(--ff-mono); padding: 2px 7px; border-radius: 20px; }
+.gain-new  { background: var(--green-l); color: var(--green); }
+.gain-flat { background: var(--cream); color: var(--ink3); border: 1px solid var(--rule2); }
+
+/* Map */
+.map-section { margin-bottom: 40px; }
+.map-box { border: 1px solid var(--rule2); border-radius: 10px; background: var(--cream); padding: 18px; position: relative; }
+#map-host { width: 100%; }
+.map-tip { position: absolute; display: none; background: var(--ink); color: var(--paper); border-radius: 6px; padding: 7px 12px; font-size: 11px; pointer-events: none; z-index: 30; }
+.map-tip strong { display: block; color: var(--gold2); margin-bottom: 1px; }
+.map-tip span   { font-family: var(--ff-mono); opacity: 0.8; }
+.map-legend { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 10px; color: var(--ink3); }
+.legend-ramp { width: 80px; height: 4px; border-radius: 2px; background: linear-gradient(to right, #d4c9b0, #3d3020); }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.anim-in { animation: fadeUp 0.35s ease both; }
+.anim-in:nth-child(2){animation-delay:.05s}
+.anim-in:nth-child(3){animation-delay:.1s}
+.anim-in:nth-child(4){animation-delay:.15s}
+</style>
+</head>
+<body>
+<div class="page-grid">
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sb-logo">Citation Analytics</div>
+  <div class="sb-tag">Google Scholar · SerpAPI</div>
+  <div class="sb-rule"></div>
+
+  <div class="sb-lbl">SerpAPI Key <span style="font-size:9px;opacity:0.5">(local test only)</span></div>
+  <div class="key-row">
+    <input class="sb-input" id="key-inp" type="password" placeholder="Paste your key…" oninput="onKeyChange()">
+    <button class="key-vis" onclick="toggleVis()">Show</button>
+  </div>
+  <div class="key-st none" id="key-st">No key saved</div>
+  <div style="font-size:10px;color:rgba(255,255,255,0.22);line-height:1.6;margin-bottom:16px;">
+    For public site: deploy<br>
+    <code style="font-size:9px;color:var(--gold2)">worker.js</code> to Cloudflare Workers<br>
+    and set <code style="font-size:9px;color:var(--gold2)">WORKER_URL</code> in the HTML.
+  </div>
+
+  <div class="sb-lbl">Google Scholar ID</div>
+  <input class="sb-input" id="sid-inp" type="text" placeholder="e.g. XvgFu_YAAAAJ" onkeydown="if(event.key==='Enter')doLoad()">
+  <button class="sb-btn" onclick="doLoad()">Analyze →</button>
+
+  <div class="sb-section">Quick access</div>
+  <div class="q-entry" onclick="quickLoad('XvgFu_YAAAAJ')">
+    <div class="q-av">GH</div>
+    <div><div class="q-name">Geoffrey Hinton</div><div class="q-id">XvgFu_YAAAAJ</div></div>
+  </div>
+  <div class="q-entry" onclick="quickLoad('JicYPdAAAAAJ')">
+    <div class="q-av">YL</div>
+    <div><div class="q-name">Yann LeCun</div><div class="q-id">JicYPdAAAAAJ</div></div>
+  </div>
+  <div class="q-entry" onclick="quickLoad('imaSMvIAAAAJ')">
+    <div class="q-av">AN</div>
+    <div><div class="q-name">Andrew Ng</div><div class="q-id">imaSMvIAAAAJ</div></div>
+  </div>
+
+  <div class="sb-footer">
+    Data: <a href="https://serpapi.com" target="_blank">SerpAPI</a> → Google Scholar<br>
+    Key stored only in your browser localStorage<br>
+    Free plan: 100 searches/month<br><br>
+    Get a free key:<br>
+    <a href="https://serpapi.com/users/sign_up" target="_blank">serpapi.com/users/sign_up</a>
+  </div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+
+  <div id="st-land" class="state active">
+    <div class="hero">
+      <h1>Track your<br><em>citation growth</em><br>day by day.</h1>
+      <p>Real Google Scholar data via SerpAPI. Paste your API key and Scholar ID in the sidebar to get started.</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat"><div class="feat-icon">📈</div><div class="feat-t">Daily growth curve</div><div class="feat-d">Citation deltas tracked automatically visit-to-visit. No backend needed.</div></div>
+      <div class="feat"><div class="feat-icon">📄</div><div class="feat-t">Paper-level analytics</div><div class="feat-d">See exactly which papers gained citations since your last visit.</div></div>
+      <div class="feat"><div class="feat-icon">🌍</div><div class="feat-t">World map</div><div class="feat-d">Estimated global citation distribution by country.</div></div>
+    </div>
+  </div>
+
+  <div id="st-load" class="state">
+    <div class="load-wrap">
+      <div class="load-row"><div class="load-ring"></div><span class="load-msg" id="load-msg">Connecting…</span></div>
+      <div class="load-steps" id="load-steps"></div>
+    </div>
+  </div>
+
+  <div id="st-dash" class="state">
+    <div id="dash-err"></div>
+
+    <div class="dash-head anim-in">
+      <div class="d-av" id="d-av"></div>
+      <div class="d-meta">
+        <div class="d-name"  id="d-name">–</div>
+        <div class="d-affil" id="d-affil">–</div>
+        <div class="d-links" id="d-links"></div>
+      </div>
+      <div class="d-upd" id="d-upd"></div>
+    </div>
+
+    <div class="metrics">
+      <div class="m-tile anim-in"><div class="m-lbl">Total Citations</div><div class="m-val" id="m-cite">–</div><div class="m-sub up" id="m-cited">–</div></div>
+      <div class="m-tile anim-in"><div class="m-lbl">h-index</div><div class="m-val" id="m-h">–</div><div class="m-sub">Google Scholar</div></div>
+      <div class="m-tile anim-in"><div class="m-lbl">i10-index</div><div class="m-val" id="m-i10">–</div><div class="m-sub">Google Scholar</div></div>
+      <div class="m-tile anim-in"><div class="m-lbl">Today +</div><div class="m-val" id="m-today">–</div><div class="m-sub up" id="m-todayd">–</div></div>
+    </div>
+
+    <div style="margin-bottom:26px;">
+      <div class="sec-head"><span class="sec-title">Citation growth</span><span class="sec-sub" id="trend-sub"></span></div>
+      <div id="trend-area"></div>
+    </div>
+
+    <div class="two-col">
+      <div class="data-panel"><div class="p-title">Top papers by citations</div><div class="hbar-list" id="d-bars"></div></div>
+      <div class="data-panel"><div class="p-title">Papers · gain since last visit</div><div class="paper-list" id="d-papers"></div></div>
+    </div>
+
+    <div class="map-section">
+      <div class="sec-head"><span class="sec-title">Citations around the world</span><span class="sec-sub">estimated distribution</span></div>
+      <div class="map-box">
+        <div id="map-host"></div>
+        <div class="map-tip" id="map-tip"><strong id="tip-c"></strong><span id="tip-v"></span></div>
+      </div>
+      <div class="map-legend">
+        <span>Fewer</span><div class="legend-ramp"></div><span>More</span>
+        <span style="margin-left:auto;font-style:italic;font-size:10px;color:var(--ink3)">Hover a country</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+const KEY_LS = 'ca_serpapi_key';
+
+// ── Key helpers ───────────────────────────────────────────────────────────
+function getKey() { return localStorage.getItem(KEY_LS) || ''; }
+function onKeyChange() {
+  const k = document.getElementById('key-inp').value.trim();
+  if (k) { localStorage.setItem(KEY_LS, k); setSt('ok', '✓ Key saved'); }
+  else   { localStorage.removeItem(KEY_LS); setSt('none', 'No key saved'); }
+}
+function setSt(cls, msg) {
+  const el = document.getElementById('key-st');
+  el.className = 'key-st ' + cls; el.textContent = msg;
+}
+function toggleVis() {
+  const inp = document.getElementById('key-inp');
+  const btn = inp.nextElementSibling;
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? 'Show' : 'Hide';
+}
+
+// ── State ─────────────────────────────────────────────────────────────────
+function showState(id) {
+  ['land','load','dash'].forEach(s =>
+    document.getElementById('st-'+s).classList.toggle('active', s===id));
+}
+
+// ── Loading steps ─────────────────────────────────────────────────────────
+const STEPS = ['Calling SerpAPI', 'Parsing author profile', 'Loading papers', 'Saving snapshot', 'Building dashboard'];
+let stepEls = [];
+function initSteps(msg) {
+  document.getElementById('load-msg').textContent = msg;
+  const wrap = document.getElementById('load-steps');
+  wrap.innerHTML = '';
+  stepEls = STEPS.map(s => {
+    const el = document.createElement('div');
+    el.className = 'ls pending'; el.textContent = s;
+    wrap.appendChild(el); return el;
+  });
+}
+function step(i) { stepEls.forEach((el,j) => el.className = 'ls '+(j<i?'done':j===i?'active':'pending')); }
+
+// ── API config ───────────────────────────────────────────────────────────
+// Set this to your Cloudflare Worker URL after deploying worker.js
+// e.g. 'https://scholar-proxy.YOUR-NAME.workers.dev'
+// Leave empty to use the key-in-browser fallback (for local testing only)
+const WORKER_URL = 'https://cool-waterfall-16e7.softword77.workers.dev';
+
+// ── Fetch via Worker (secure) or direct JSONP (local test only) ──────────
+async function serpFetch(params) {
+  const key = getKey();
+
+  if (WORKER_URL) {
+    // Production: call your Cloudflare Worker — key is hidden server-side
+    // Worker expects ?id=, ?view=, ?sort= (not author_id)
+    const workerParams = new URLSearchParams();
+    if (params.author_id) workerParams.set('id', params.author_id);
+    if (params.view)      workerParams.set('view', params.view);
+    if (params.sort)      workerParams.set('sort', params.sort);
+    const r    = await fetch(WORKER_URL + '?' + workerParams.toString());
+    const data = await r.json();
+    if (data.error) throw new Error('API error: ' + data.error);
+    return data;
+  }
+
+  // ── Local-only fallback: direct fetch with key in URL ─────────────────
+  // This works when opening the file from localhost / file://.
+  // DO NOT deploy this path to a public website — the key will be visible.
+  if (!key) throw new Error('No Worker URL configured. Set WORKER_URL in the HTML, or paste your SerpAPI key in the sidebar for local testing.');
+
+  return new Promise((resolve, reject) => {
+    const cbName = '__serp_' + Math.random().toString(36).slice(2);
+    const qs = new URLSearchParams({
+      ...params, api_key: key,
+      engine: 'google_scholar_author',
+      callback: cbName,
+    });
+
+    window[cbName] = (data) => {
+      delete window[cbName]; script.remove(); clearTimeout(timer);
+      if (data.error) { reject(new Error('SerpAPI: ' + data.error)); return; }
+      resolve(data);
+    };
+
+    const script = document.createElement('script');
+    script.src = 'https://serpapi.com/search.js?' + qs.toString();
+    script.onerror = () => {
+      delete window[cbName]; clearTimeout(timer);
+      reject(new Error('Direct SerpAPI call blocked. Fix: set WORKER_URL in the HTML.'));
+    };
+    const timer = setTimeout(() => {
+      delete window[cbName]; script.remove();
+      reject(new Error('Request timed out.'));
+    }, 15000);
+    document.head.appendChild(script);
+  });
+}
+
+// ── Parse SerpAPI data ────────────────────────────────────────────────────
+function parseProfile(raw) {
+  const a = raw.author || {};
+  const cb = raw.cited_by || {};
+  const tbl = cb.table || [];
+  // table row format: {h_index: {all: 6, since_2021: 6}}
+  function idx(key) {
+    for (const row of tbl) {
+      if (row[key] !== undefined) {
+        const v = row[key];
+        return typeof v === 'object' ? (v.all || 0) : (v || 0);
+      }
+    }
+    return 0;
+  }
+  const yearly = {};
+  for (const row of (cb.graph || [])) if (row.year) yearly[String(row.year)] = row.citations || 0;
+  // Parse total citations from table: [{citations:{all:231,since_2021:230}}, ...]
+  let totalCite = 0;
+  for (const row of tbl) {
+    if (row.citations) {
+      totalCite = typeof row.citations === 'object'
+        ? (row.citations.all || 0)
+        : (row.citations || 0);
+      break;
+    }
+  }
+  // Fallback: sum yearly graph
+  if (!totalCite) {
+    totalCite = (cb.graph || []).reduce((s, r) => s + (r.citations || 0), 0);
+  }
+
+  return {
+    name: a.name || '', affil: a.affiliations || '', thumbnail: a.thumbnail || '',
+    scholarId: a.author_id || '',
+    totalCite, hIndex: idx('h_index'), i10: idx('i10_index'), yearly,
+  };
+}
+
+function parseArticles(raw) {
+  return (raw.articles || []).map(a => ({
+    title: a.title || 'Untitled',
+    year:  a.year  || '—',
+    cited: a.cited_by?.value || 0,
+    link:  a.cited_by?.link  || '#',
+    id:    a.citation_id || (a.title||'').slice(0,40) || String(Math.random()),
+  }));
+}
+
+// ── Snapshot / delta tracking ─────────────────────────────────────────────
+function snapKey(id) { return 'ca_gs_' + id; }
+function getHist(id) { try { return JSON.parse(localStorage.getItem(snapKey(id))||'[]'); } catch(_){ return []; } }
+
+function saveSnap(id, total, articles) {
+  const today = new Date().toISOString().slice(0,10);
+  let h = getHist(id).filter(s => Date.now()-new Date(s.date) < 90*86400000).filter(s => s.date!==today);
+  h.push({ date: today, total, articles: articles.slice(0,30).map(a=>({id:a.id,c:a.cited})) });
+  try { localStorage.setItem(snapKey(id), JSON.stringify(h)); } catch(_){}
+}
+
+function getTrend(id) {
+  const h = getHist(id);
+  if (h.length < 2) return [];
+  return h.slice(1).map((s,i) => ({ date: s.date, delta: Math.max(0, s.total - h[i].total) }));
+}
+
+function getDeltas(id, articles) {
+  const h = getHist(id);
+  if (h.length < 2) return {};
+  const prev = h[h.length-2];
+  const pm = {}; (prev.articles||[]).forEach(a => pm[a.id]=a.c);
+  const out = {};
+  articles.forEach(a => { const d=a.cited-(pm[a.id]??a.cited); if(d>0) out[a.id]=d; });
+  return out;
+}
+
+// ── Country estimation ────────────────────────────────────────────────────
+const CW={'United States':100,'China':65,'United Kingdom':30,'Germany':22,'France':18,'Canada':18,'Australia':14,'India':13,'Japan':11,'South Korea':10,'Netherlands':8,'Switzerland':7,'Sweden':7,'Italy':6,'Spain':6,'Brazil':5,'Singapore':4,'Taiwan':4,'Israel':4,'Russia':4,'Poland':3,'Belgium':3,'Denmark':2,'Norway':2,'Austria':2,'Finland':2,'Portugal':2,'Czech Republic':2,'Turkey':2,'Mexico':2,'Argentina':2,'Chile':1,'New Zealand':1,'South Africa':1,'Greece':1,'Hungary':1,'Romania':1,'Ukraine':1,'Pakistan':1,'Iran':1};
+const CISO={'United States':'840','China':'156','United Kingdom':'826','Germany':'276','France':'250','Canada':'124','Australia':'036','India':'356','Japan':'392','South Korea':'410','Netherlands':'528','Switzerland':'756','Sweden':'752','Italy':'380','Spain':'724','Brazil':'076','Singapore':'702','Taiwan':'158','Israel':'376','Russia':'643','Poland':'616','Belgium':'056','Denmark':'208','Norway':'578','Austria':'040','Finland':'246','Portugal':'620','Czech Republic':'203','Turkey':'792','Mexico':'484','Argentina':'032','Chile':'152','New Zealand':'554','South Africa':'710','Greece':'300','Hungary':'348','Romania':'642','Ukraine':'804','Pakistan':'586','Iran':'364'};
+function estCountries(total) {
+  const tw=Object.values(CW).reduce((a,b)=>a+b,0);
+  const out={};
+  for(const [c,w] of Object.entries(CW)) out[c]=Math.round(w/tw*total);
+  return out;
+}
+
+// ── Load flow ─────────────────────────────────────────────────────────────
+let trendChart=null, currentId='';
+
+function quickLoad(id) { document.getElementById('sid-inp').value=id; doLoad(); }
+
+function doLoad() {
+  const id  = document.getElementById('sid-inp').value.trim();
+  const key = getKey();
+  if (!id)  { alert('Enter a Google Scholar ID.'); return; }
+  if (!key) { alert('Paste your SerpAPI key in the sidebar first.'); return; }
+  currentId = id;
+  document.getElementById('dash-err').innerHTML = '';
+  showState('load');
+  initSteps('Fetching from Google Scholar via SerpAPI…');
+  runLoad(id);
+}
+
+async function runLoad(id) {
+  try {
+    step(0);
+    const [profileRaw, articlesRaw] = await Promise.all([
+      serpFetch({ author_id: id, view: 'metrics' }),
+      serpFetch({ author_id: id, sort: 'cited' }),
+    ]);
+    step(1); const profile  = parseProfile(profileRaw);
+    step(2); const articles = parseArticles(articlesRaw);
+    step(3); saveSnap(id, profile.totalCite, articles);
+    step(4); renderDash(id, profile, articles);
+    showState('dash');
+  } catch(e) {
+    showState('dash');
+    // Preserve newlines from multi-line error messages
+    const msg = e.message.replace(/</g,'&lt;').replace(/\n/g,'<br>');
+    document.getElementById('dash-err').innerHTML =
+      `<div class="err-box"><h3>Could not load data</h3><p style="font-family:var(--ff-mono);font-size:11px;white-space:pre-wrap;">${msg}</p></div>`;
+  }
+}
+
+// ── Render dashboard ──────────────────────────────────────────────────────
+function renderDash(id, profile, articles) {
+  const av = document.getElementById('d-av');
+  if (profile.thumbnail) av.innerHTML = `<img src="${profile.thumbnail}" alt="">`;
+  else av.textContent = (profile.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+
+  document.getElementById('d-name').textContent  = profile.name || id;
+  document.getElementById('d-affil').textContent = profile.affil || '—';
+  document.getElementById('d-links').innerHTML   =
+    `<a class="d-link" href="https://scholar.google.com/citations?user=${id}" target="_blank" rel="noopener">Google Scholar ↗</a>`;
+  document.getElementById('d-upd').textContent   = 'Updated ' + new Date().toLocaleDateString(undefined,{dateStyle:'medium'});
+
+  const trend    = getTrend(id);
+  const deltas   = getDeltas(id, articles);
+  const todayD   = trend.length ? trend[trend.length-1].delta : 0;
+  const monthSum = trend.reduce((a,b)=>a+b.delta,0);
+  const avgD     = trend.length ? Math.round(monthSum/trend.length) : 0;
+
+  document.getElementById('m-cite').textContent  = (profile.totalCite||0).toLocaleString();
+  document.getElementById('m-cited').textContent = trend.length ? `+${monthSum.toLocaleString()} last ${trend.length}d` : 'tracking starts next visit';
+  document.getElementById('m-h').textContent     = profile.hIndex ?? '–';
+  document.getElementById('m-i10').textContent   = profile.i10 ?? '–';
+  document.getElementById('m-today').textContent  = todayD>0 ? '+'+todayD : '—';
+  document.getElementById('m-todayd').textContent = avgD>0 ? `avg ${avgD}/day` : 'visit again tomorrow';
+
+  // Trend chart
+  if (trendChart) { trendChart.destroy(); trendChart=null; }
+  const area = document.getElementById('trend-area');
+  const sub  = document.getElementById('trend-sub');
+  if (trend.length >= 2) {
+    sub.textContent = `${trend.length}-day history · +${monthSum} total`;
+    area.innerHTML  = '<div class="trend-canvas-wrap"><canvas id="tc"></canvas></div>';
+    trendChart = new Chart(document.getElementById('tc'), {
+      type: 'bar',
+      data: { labels: trend.map(t=>t.date.slice(5)), datasets: [{
+        data: trend.map(t=>t.delta),
+        backgroundColor: trend.map((_,i)=>i===trend.length-1?'#b8924a':'rgba(14,13,11,0.13)'),
+        borderRadius: 3, borderSkipped: false,
+      }]},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend:{display:false}, tooltip:{callbacks:{label:c=>` +${c.parsed.y} citations`}} },
+        scales: {
+          x: { ticks:{color:'#7a7870',font:{size:10,family:'DM Mono'},autoSkip:true,maxTicksLimit:10,maxRotation:0}, grid:{display:false}, border:{display:false} },
+          y: { ticks:{color:'#7a7870',font:{size:10,family:'DM Mono'}}, grid:{color:'rgba(0,0,0,0.05)'}, border:{display:false} }
+        }
+      }
+    });
+  } else {
+    sub.textContent = 'visit again tomorrow to see growth';
+    area.innerHTML  = `<div class="trend-empty"><p>The chart appears after <strong>2+ days of visits</strong>.<br>Today's snapshot is saved — come back tomorrow.</p></div>`;
+  }
+
+  // Bars
+  const topN = articles.slice(0,7);
+  const maxC = Math.max(...topN.map(a=>a.cited),1);
+  document.getElementById('d-bars').innerHTML = topN.map((a,i)=>`
+    <div class="hbar-row">
+      <span class="hbar-lbl" title="${a.title}">${a.title.slice(0,14)}…</span>
+      <div class="hbar-track"><div class="hbar-fill ${i===0?'top':''}" style="width:${Math.round(a.cited/maxC*100)}%"></div></div>
+      <span class="hbar-num">${a.cited>=1000?(a.cited/1000).toFixed(1)+'k':a.cited}</span>
+    </div>`).join('');
+
+  // Papers
+  document.getElementById('d-papers').innerHTML = articles.slice(0,8).map((a,i)=>{
+    const d=deltas[a.id]||0;
+    return `<a class="paper-row" href="${a.link}" target="_blank" rel="noopener">
+      <span class="p-n">${i+1}</span>
+      <div class="p-body"><div class="p-t">${a.title}</div><div class="p-meta">${a.year} · ${a.cited.toLocaleString()} citations</div></div>
+      <span class="p-gain ${d>0?'gain-new':'gain-flat'}">${d>0?'+'+d:'—'}</span>
+    </a>`;
+  }).join('');
+
+  renderMap(estCountries(profile.totalCite||0));
+}
+
+// ── World map ─────────────────────────────────────────────────────────────
+async function renderMap(countries) {
+  const host=document.getElementById('map-host'), tip=document.getElementById('map-tip');
+  host.innerHTML='';
+  const isoMap={};
+  for(const [name,count] of Object.entries(countries)){ const iso=CISO[name]; if(iso) isoMap[iso]={name,count}; }
+  const maxV=Math.max(...Object.values(countries),1);
+  const palette=['#e8e2d4','#d4c9b0','#bfaf8c','#a89268','#8f7548','#735a30','#4d3a18'];
+  const cScale=d3.scaleQuantize([0,maxV],palette);
+  try {
+    const world=await d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json');
+    const W=host.getBoundingClientRect().width||640, H=Math.round(W*0.5);
+    const svg=d3.select(host).append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('width','100%').style('display','block');
+    const proj=d3.geoNaturalEarth1().scale(W/6.3).translate([W/2,H/2]);
+    const path=d3.geoPath(proj);
+    svg.append('path').datum(d3.geoGraticule()()).attr('d',path).attr('fill','none').attr('stroke','rgba(0,0,0,0.05)').attr('stroke-width','0.5');
+    svg.selectAll('path.co').data(topojson.feature(world,world.objects.countries).features)
+      .join('path').attr('class','co').attr('d',path)
+      .attr('fill',f=>isoMap[f.id]?cScale(isoMap[f.id].count):'#ede9e0')
+      .attr('stroke','rgba(255,255,255,0.7)').attr('stroke-width','0.4')
+      .style('cursor',f=>isoMap[f.id]?'pointer':'default')
+      .on('mousemove',function(event,f){
+        const e=isoMap[f.id]; if(!e) return;
+        const rect=host.getBoundingClientRect();
+        tip.style.display='block';
+        tip.style.left=(event.clientX-rect.left+14)+'px';
+        tip.style.top=(event.clientY-rect.top-44)+'px';
+        document.getElementById('tip-c').textContent=e.name;
+        document.getElementById('tip-v').textContent=e.count.toLocaleString()+' est.';
+      })
+      .on('mouseleave',()=>{tip.style.display='none';});
+  } catch(e) {
+    host.innerHTML=`<p style="font-size:12px;color:var(--ink3);padding:20px;text-align:center;">Map unavailable — ${e.message}</p>`;
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+(function init() {
+  const stored = getKey();
+  if (stored) { document.getElementById('key-inp').value=stored; setSt('ok','✓ Key loaded'); }
+  const p = new URLSearchParams(location.search);
+  const urlId = p.get('id') || p.get('scholar');
+  if (urlId) { document.getElementById('sid-inp').value=urlId; if(stored) doLoad(); }
+})();
+</script>
+</body>
+</html>
