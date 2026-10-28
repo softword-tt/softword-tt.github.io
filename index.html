@@ -103,7 +103,7 @@
               </div>
             </div>
 
-        <div id="main-highlights">
+        <div>
             <div class="list-item publication" data-category="publication">
               <a href="https://arxiv.org/abs/2505.05307" class="thumbnail">
                 <img src="images/pre-mamba.jpg" alt="" />
@@ -180,7 +180,7 @@
         </div>
 
         <!-- All Publications (Click to Show) -->
-        <div id="more-highlights" style="display: None">
+        <div id="more-highlights" style="display: none">
 
           <div class="list-item publication" data-category="publication">
             <a href="https://arxiv.org/abs/2503.22943" class="thumbnail">
@@ -558,7 +558,7 @@
         var x = document.getElementById("main-highlights");
         var y = document.getElementById("more-highlights");
         var b = document.getElementById("toggle_highlights_button")
-        if (y.style.display === "none") {
+        if (window.getComputedStyle(y).display === "none") {
           x.style.display = "none";
           y.style.display = "block";
           b.innerHTML = "Show less publications"
